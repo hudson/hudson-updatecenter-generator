@@ -15,10 +15,13 @@
 
 package org.hudsonci.update.client.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * Model representing core info
  * @author Winston Prakash
  */
+@JsonIgnoreProperties({"sha1"})
 public class Core {
 
     private String buildDate ;

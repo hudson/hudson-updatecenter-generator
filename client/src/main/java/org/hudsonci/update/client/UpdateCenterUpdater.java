@@ -66,6 +66,7 @@ public class UpdateCenterUpdater {
     }
 
     public void checkForNewUpdates() throws IOException {
+        System.out.println("Checking for updates at maven central.");
         UpdateSiteMetadata hudsonNewUpdates = UpdateCenterUtils.getNewUpdates(newUpdatesBaseUrl);
 
         for (String pluginName : hudsonNewUpdates.getPlugins().keySet()) {
@@ -78,6 +79,7 @@ public class UpdateCenterUpdater {
     }
 
     public void checkForJenkinsUpdates() throws IOException {
+        System.out.println("Checking for updates at Jenkins Update Center.");
         UpdateSiteMetadata jenkinsUpdateSiteMetadata = UpdateCenterUtils.parseFromUrl(jenkinsUpdateCenterURL);
 
         List<String> updatablePlugins = new ArrayList<String>();

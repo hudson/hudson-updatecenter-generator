@@ -5,7 +5,7 @@
     <artifactId>update</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-  <name>Hudson Update</name>
+  <name>Hudson :: Update Center Generator</name>
   <modules>
     <module>executable-war</module>
     <module>core</module>
