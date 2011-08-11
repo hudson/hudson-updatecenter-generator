@@ -39,6 +39,8 @@ public class UpdateCenterUpdater {
     private final String pluginsFolder = hudsonWebFolder + "downloads/plugins";
     private final String updatableJenkisPluginsList = hudsonWebFolder + "UpdatableJenkinsPlugins.lst";
     private static final String newUpdatesBaseUrl = "http://us3.maven.org:8085/rest";
+    private static final String jvnet_groupid = "org.jvnet.hudson.plugins";
+    private static final String hudsonci_groupid = "org.hudsonci.plugins";
     public final String hudsonUpdateCenter = hudsonWebFolder + "update-center.json";
     private final String pluginsDownloadUrl = "http://hudson-ci.org/downloads/plugins/";
     private UpdateSiteMetadata hudsonUpdateSiteMetadata;
@@ -65,9 +67,9 @@ public class UpdateCenterUpdater {
         hudsonUpdateSiteMetadata = UpdateCenterUtils.parse(json);
     }
 
-    public void checkForNewUpdates() throws IOException {
-        System.out.println("Checking for updates at maven central.");
-        UpdateSiteMetadata hudsonNewUpdates = UpdateCenterUtils.getNewUpdates(newUpdatesBaseUrl);
+    public void checkForNewUpdates(String groupid) throws IOException {
+        System.out.println("Checking for updates at maven central (groupid: " + groupid);
+        UpdateSiteMetadata hudsonNewUpdates = UpdateCenterUtils.getNewUpdates(newUpdatesBaseUrl, groupid);
 
         for (String pluginName : hudsonNewUpdates.getPlugins().keySet()) {
             Plugin newPlugin = hudsonNewUpdates.findPlugin(pluginName);
@@ -149,7 +151,9 @@ public class UpdateCenterUpdater {
         UpdateCenterUpdater updateCenterUpdater = new UpdateCenterUpdater();
         updateCenterUpdater.checkForJenkinsUpdates();
         updateCenterUpdater.persistJson();
-        updateCenterUpdater.checkForNewUpdates();
+        updateCenterUpdater.checkForNewUpdates(jvnet_groupid);
+        updateCenterUpdater.persistJson();
+        updateCenterUpdater.checkForNewUpdates(hudsonci_groupid);
         updateCenterUpdater.persistJson();
     }
 }

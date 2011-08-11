@@ -203,8 +203,8 @@ public class Plugin {
         //
         // This is null until we do parent POM parsing
         //
-        //String groupId = mavenPom.getGroupId();
-        String groupId = "org.jvnet.hudson.plugins";
+        String groupId = hudsonPluginMavenMetadata.getGroupId();
+        //String groupId = "org.jvnet.hudson.plugins";
 
         String path = groupId.replace('.', '/') + "/" + hudsonPluginMavenPom.getArtifactId() + "/" + getVersion() + "/"
                 + hudsonPluginMavenPom.getArtifactId() + "-" + getVersion() + ".hpi";
