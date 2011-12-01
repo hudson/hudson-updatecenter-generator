@@ -6,8 +6,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import org.hudsonci.update.client.model.Plugin;
 import org.hudsonci.update.client.model.UpdateSiteMetadata;
 
@@ -18,20 +18,22 @@ import org.hudsonci.update.client.model.UpdateSiteMetadata;
  */
 public class UpdateCenterUpdater {
 
-    public final String jenkinsUpdateCenterURL = "http://updates.jenkins-ci.org/update-center.json";
-    private final String hudsonWebFolder = "/home/hudson/public_html/";
-    //private final String hudsonWebFolder = "/Users/winstonp/Downloads/";
-    private final String pluginsFolder = hudsonWebFolder + "downloads/plugins";
-    private final String updatableJenkisPluginsList = hudsonWebFolder + "UpdatableJenkinsPlugins.lst";
-    private static final String newUpdatesBaseUrl = "http://us3.maven.org:8085/rest";
-    public final String hudsonUpdateCenter = hudsonWebFolder + "update-center.json";
-    private final String pluginsDownloadUrl = "http://hudson-ci.org/downloads/plugins/";
+    public static final String JENKINS_UPDATE_CENTER_URL = "http://updates.jenkins-ci.org/update-center.json";
+    private static final String HUDSON_WEB_FOLDER = "/home/hudson/public_html/";
+    //private static final String HUDSON_WEB_FOLDER = "/Users/winstonp/Downloads/";
+    private static final String PLUGINS_FOLDER = HUDSON_WEB_FOLDER + "downloads/plugins";
+    private static final String UPDATABLE_JENKINS_PLUGINS_LIST = HUDSON_WEB_FOLDER + "UpdatableJenkinsPlugins.lst";
+    private static final String IGNORE_PLUGINS_LIST = HUDSON_WEB_FOLDER + "IgnoreHudsonPlugins.lst";
+    private static final String NEW_UPDATES_BASE_URL = "http://us3.maven.org:8085/rest";
+    public static final String HUDSON_UPDATE_CENTER = HUDSON_WEB_FOLDER + "update-center.json";
+    private static final String PLUGINS_DOWNLOAD_URL = "http://hudson-ci.org/downloads/plugins/";
+    private static final String[] HUDSON_PLUGIN_PATHS = {"org/jvnet/hudson/plugins", "org/hudsonci/plugins"};
     private UpdateSiteMetadata hudsonUpdateSiteMetadata;
     private boolean foundUpdates = false;
 
     public UpdateCenterUpdater() throws IOException {
         StringBuilder StringBuilder = new StringBuilder();
-        BufferedReader in = new BufferedReader(new FileReader(hudsonUpdateCenter));
+        BufferedReader in = new BufferedReader(new FileReader(HUDSON_UPDATE_CENTER));
         String str;
         while ((str = in.readLine()) != null) {
             StringBuilder.append(str);
@@ -51,27 +53,40 @@ public class UpdateCenterUpdater {
     }
 
     public void checkForNewUpdates() throws IOException {
-        UpdateSiteMetadata hudsonNewUpdates = UpdateCenterUtils.getNewUpdates(newUpdatesBaseUrl);
-
-        for (String pluginName : hudsonNewUpdates.getPlugins().keySet()) {
-            Plugin newPlugin = hudsonNewUpdates.findPlugin(pluginName);
-            Plugin hudsonPlugin = hudsonUpdateSiteMetadata.findPlugin(pluginName);
-            if ((hudsonPlugin == null) || newPlugin.isNewerThan(hudsonPlugin)) {
-                update(hudsonPlugin, newPlugin, false);
+        Set<String> ignorePlugins = new HashSet<String>();
+        if (new File(IGNORE_PLUGINS_LIST).exists()) {
+            ignorePlugins = readPluginList(IGNORE_PLUGINS_LIST);
+        }
+        for (String hudsonPluginPath : HUDSON_PLUGIN_PATHS) {
+            try {
+                System.out.println(new StringBuilder().append("Checking for updates at maven central (groupid path: ")
+                    .append(hudsonPluginPath)
+                    .append(")")
+                    .toString());
+                UpdateSiteMetadata hudsonNewUpdates = UpdateCenterUtils.getNewUpdates(NEW_UPDATES_BASE_URL,
+                    hudsonPluginPath);
+                for (String pluginName : hudsonNewUpdates.getPlugins().keySet()) {
+                    if (!ignorePlugins.contains(pluginName)) {
+                        Plugin newPlugin = hudsonNewUpdates.findPlugin(pluginName);
+                        Plugin hudsonPlugin = hudsonUpdateSiteMetadata.findPlugin(pluginName);
+                        if ((hudsonPlugin == null) || newPlugin.isNewerThan(hudsonPlugin)) {
+                            update(hudsonPlugin, newPlugin, false);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
     public void checkForJenkinsUpdates() throws IOException {
-        UpdateSiteMetadata jenkinsUpdateSiteMetadata = UpdateCenterUtils.parseFromUrl(jenkinsUpdateCenterURL);
-
-        List<String> updatablePlugins = new ArrayList<String>();
-        BufferedReader in = new BufferedReader(new FileReader(updatableJenkisPluginsList));
-        String updatablePlugin;
-        while ((updatablePlugin = in.readLine()) != null) {
-            updatablePlugins.add(updatablePlugin);
+        if (!new File(UPDATABLE_JENKINS_PLUGINS_LIST).exists()) {
+            return;
         }
-        in.close();
+        UpdateSiteMetadata jenkinsUpdateSiteMetadata = UpdateCenterUtils.parseFromUrl(JENKINS_UPDATE_CENTER_URL);
+
+        Set<String> updatablePlugins = readPluginList(UPDATABLE_JENKINS_PLUGINS_LIST);
 
         for (String pluginName : jenkinsUpdateSiteMetadata.getPlugins().keySet()) {
             if (updatablePlugins.contains(pluginName)) {
@@ -85,22 +100,51 @@ public class UpdateCenterUpdater {
         }
     }
 
+    private Set<String> readPluginList(String filePath) throws IOException {
+        Set<String> plugins = new HashSet<String>();
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(filePath));
+            String updatablePlugin;
+            while ((updatablePlugin = in.readLine()) != null) {
+                plugins.add(updatablePlugin);
+            }
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
+        return plugins;
+    }
+
     private void update(Plugin oldPlugin, Plugin newPlugin, boolean isJenkins) throws IOException {
         foundUpdates = true;
 
-        File pluginFolder = new File(pluginsFolder, newPlugin.getName());
+        File pluginFolder = new File(PLUGINS_FOLDER, newPlugin.getName());
         File pluginVersionFolder = new File(pluginFolder, newPlugin.getVersion());
         pluginVersionFolder.mkdirs();
         UpdateCenterUtils.downloadFile(newPlugin.getUrl(), new File(pluginVersionFolder, newPlugin.getName() + ".hpi"));
-        newPlugin.setUrl(pluginsDownloadUrl + newPlugin.getName() + "/" + newPlugin.getVersion() + "/" + newPlugin.getName() + ".hpi");
+        newPlugin.setUrl(
+            PLUGINS_DOWNLOAD_URL + newPlugin.getName() + "/" + newPlugin.getVersion() + "/" + newPlugin.getName() + ".hpi");
         if (isJenkins) {
             newPlugin.setWiki(newPlugin.getWiki().replaceAll("jenkins", "hudson").replaceAll("JENKINS", "HUDSON"));
         }
         if (oldPlugin == null) {
-            System.out.println("New Plugin found - " + newPlugin.getName() + "(" + newPlugin.getVersion() + ")");
+            System.out.println(new StringBuilder().append("New Plugin found - ")
+                .append(newPlugin.getName())
+                .append("(")
+                .append(newPlugin.getVersion())
+                .append(")")
+                .toString());
             hudsonUpdateSiteMetadata.add(newPlugin);
         } else {
-            System.out.println("Newer version available for \"" + newPlugin.getName() + "\" Current: " + oldPlugin.getVersion() + " New: " + newPlugin.getVersion());
+            System.out.println(new StringBuilder().append("Newer version available for \"")
+                .append(newPlugin.getName())
+                .append("\" Current: ")
+                .append(oldPlugin.getVersion())
+                .append(" New: ")
+                .append(newPlugin.getVersion())
+                .toString());
             hudsonUpdateSiteMetadata.replacePlugin(oldPlugin, newPlugin);
         }
     }
@@ -110,13 +154,13 @@ public class UpdateCenterUpdater {
             String newJson = UpdateCenterUtils.getAsString(hudsonUpdateSiteMetadata);
             newJson = "updateCenter.post(" + newJson + ");";
             System.out.println(newJson);
-            File newUpdateCenter = new File(hudsonWebFolder + "update-center_new.json");
+            File newUpdateCenter = new File(HUDSON_WEB_FOLDER + "update-center_new.json");
             BufferedWriter out = new BufferedWriter(new FileWriter(newUpdateCenter));
             out.write(newJson);
             out.close();
-            File oldUpdateCenter = new File(hudsonUpdateCenter);
+            File oldUpdateCenter = new File(HUDSON_UPDATE_CENTER);
             if (!oldUpdateCenter.delete()) {
-                throw new IOException("Failed to delete " + hudsonUpdateCenter);
+                throw new IOException("Failed to delete " + HUDSON_UPDATE_CENTER);
             }
 
             if (!newUpdateCenter.renameTo(oldUpdateCenter)) {

@@ -68,11 +68,11 @@ public class UpdateCenterUtils {
         return writer.toString();
     }
 
-    public static UpdateSiteMetadata getNewUpdates(String baseUri) throws IOException {
+    public static UpdateSiteMetadata getNewUpdates(String baseUri, String pluginPath) throws IOException {
 
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
-        WebResource webResource = client.resource(baseUri).path("artifacts").queryParam("path", "org/jvnet/hudson/plugins");
+        WebResource webResource = client.resource(baseUri).path("artifacts").queryParam("path", pluginPath);
 
         String json = webResource.accept(MediaType.TEXT_PLAIN).get(String.class);
         client.destroy();

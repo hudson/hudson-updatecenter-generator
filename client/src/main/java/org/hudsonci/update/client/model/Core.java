@@ -10,6 +10,7 @@ public class Core {
     private String name;
     private String url;
     private String version;
+    private String sha1;
 
     public String getBuildDate() {
         return buildDate;
@@ -41,5 +42,13 @@ public class Core {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getSha1() {
+        return sha1;
+    }
+
+    public void setSha1(String sha1) {
+        this.sha1 = sha1;
     }
 }
