@@ -1,16 +1,18 @@
 package org.hudsonci.update.client.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 /**
  * Model representing core info
  * @author Winston Prakash
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Core {
 
     private String buildDate ;
     private String name;
     private String url;
     private String version;
-    private String sha1;
 
     public String getBuildDate() {
         return buildDate;
@@ -42,13 +44,5 @@ public class Core {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public String getSha1() {
-        return sha1;
-    }
-
-    public void setSha1(String sha1) {
-        this.sha1 = sha1;
     }
 }
