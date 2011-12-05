@@ -17,6 +17,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 )
 public class Plugin {
 
+    protected static final String DEFAULT_CORE_VERSION = "1.395";
     private List<String> labels = new ArrayList<String>();
     private String excerpt;
     private List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -57,6 +58,10 @@ public class Plugin {
         }
         if (StringUtils.isNotBlank(newPlugin.getRequiredCore())){
             requiredCore = newPlugin.getRequiredCore();
+        } else {
+            if (requiredCore == null) {
+                requiredCore = DEFAULT_CORE_VERSION;
+            }
         }
         if (StringUtils.isNotBlank(newPlugin.getScm())){
             scm = newPlugin.getScm();
