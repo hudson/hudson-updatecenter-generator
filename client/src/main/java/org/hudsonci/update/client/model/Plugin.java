@@ -17,18 +17,22 @@ package org.hudsonci.update.client.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonAnySetter;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonWriteNullProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * Model representing Plugin info
  * @author Winston Prakash
  */
-@JsonWriteNullProperties(false)
+@JsonSerialize(
+    include = JsonSerialize.Inclusion.NON_NULL
+)
 public class Plugin {
 
+    protected static final String DEFAULT_CORE_VERSION = "1.395";
     private List<String> labels = new ArrayList<String>();
     private String excerpt;
     private List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -37,7 +41,7 @@ public class Plugin {
     private String name;
     private String previousTimestamp;
     private String releaseTimestamp;
-    private String requiredCore;
+    private String requiredCore ;
     private String scm ;
     private String title;
     private String url;
@@ -46,46 +50,50 @@ public class Plugin {
     private String previousVersion;
     
     public void set(Plugin newPlugin){
-        if (newPlugin.getLabels() != null && !newPlugin.getLabels().isEmpty()){
+        if (CollectionUtils.isNotEmpty(newPlugin.getLabels())){
             labels = newPlugin.getLabels();
         }
-        if (newPlugin.getExcerpt() != null && !"".equals(newPlugin.getExcerpt().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getExcerpt())){
             excerpt = newPlugin.getExcerpt();
         }
-        if (newPlugin.getDependencies() != null && !newPlugin.getDependencies().isEmpty()){
+        if (CollectionUtils.isNotEmpty(newPlugin.getDependencies())){
             dependencies = newPlugin.getDependencies();
         }
-        if (newPlugin.getDevelopers() != null && !newPlugin.getDevelopers().isEmpty()){
+        if (CollectionUtils.isNotEmpty(newPlugin.getDevelopers())){
             developers = newPlugin.getDevelopers();
         }
-        if (newPlugin.getBuildDate() != null && !"".equals(newPlugin.getBuildDate().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getBuildDate())){
             buildDate = newPlugin.getBuildDate();
         }
-        if (newPlugin.getPreviousTimestamp() != null && !"".equals(newPlugin.getPreviousTimestamp().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getPreviousTimestamp())){
             previousTimestamp = newPlugin.getPreviousTimestamp();
         }
-        if (newPlugin.getReleaseTimestamp() != null && !"".equals(newPlugin.getReleaseTimestamp().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getReleaseTimestamp())){
             releaseTimestamp = newPlugin.getReleaseTimestamp();
         }
-        if (newPlugin.getRequiredCore() != null && !"".equals(newPlugin.getRequiredCore().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getRequiredCore())){
             requiredCore = newPlugin.getRequiredCore();
+        } else {
+            if (requiredCore == null) {
+                requiredCore = DEFAULT_CORE_VERSION;
+            }
         }
-        if (newPlugin.getScm() != null && !"".equals(newPlugin.getScm().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getScm())){
             scm = newPlugin.getScm();
         }
-        if (newPlugin.getTitle() != null && !"".equals(newPlugin.getTitle().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getTitle())){
             title = newPlugin.getTitle();
         }
-        if (newPlugin.getUrl() != null && !"".equals(newPlugin.getUrl().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getUrl())){
             url = newPlugin.getUrl();
         }
-        if (newPlugin.getVersion() != null && !"".equals(newPlugin.getVersion().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getVersion())){
             version = newPlugin.getVersion();
         }
-        if (newPlugin.getWiki() != null && !"".equals(newPlugin.getWiki().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getWiki())){
             wiki = newPlugin.getWiki();
         }
-        if (newPlugin.getPreviousVersion() != null && !"".equals(newPlugin.getPreviousVersion().trim())){
+        if (StringUtils.isNotBlank(newPlugin.getPreviousVersion())){
             previousVersion = newPlugin.getPreviousVersion();
         }
     }

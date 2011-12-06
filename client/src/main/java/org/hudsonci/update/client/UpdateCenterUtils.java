@@ -83,12 +83,12 @@ public class UpdateCenterUtils {
         return writer.toString();
     }
 
-    public static UpdateSiteMetadata getNewUpdates(String baseUri, String groupid) throws IOException {
+
+    public static UpdateSiteMetadata getNewUpdates(String baseUri, String pluginPath) throws IOException {
 
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
-        String pluginsPath = groupid.replaceAll("\\.", "/");
-        WebResource webResource = client.resource(baseUri).path("artifacts").queryParam("path", pluginsPath);
+        WebResource webResource = client.resource(baseUri).path("artifacts").queryParam("path", pluginPath);
 
         String json = webResource.accept(MediaType.TEXT_PLAIN).get(String.class);
         client.destroy();

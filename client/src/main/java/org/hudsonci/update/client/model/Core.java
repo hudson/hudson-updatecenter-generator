@@ -21,7 +21,8 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  * Model representing core info
  * @author Winston Prakash
  */
-@JsonIgnoreProperties({"sha1"})
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Core {
 
     private String buildDate ;

@@ -15,7 +15,7 @@
 
 package org.hudsonci.update.client;
 
-import com.sun.tools.javah.Util;
+//import com.sun.tools.javah.Util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,7 +74,7 @@ public class WebRequest {
                 urlConn.connect();
                 connected = true;
             } catch (SocketTimeoutException exc) {
-                Util.log("Connection timed out. try " + count);
+                // Util.log("Connection timed out. try " + count);
                 if (++count > TIME_OUT_RETRY_COUNT) {
                     throw new IOException(
                             "Connection timed out after " + TIME_OUT_RETRY_COUNT + " tries");
