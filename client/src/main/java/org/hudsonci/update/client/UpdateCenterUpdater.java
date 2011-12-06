@@ -175,6 +175,7 @@ public class UpdateCenterUpdater {
 
         UpdateCenterUpdater updateCenterUpdater = new UpdateCenterUpdater();
         updateCenterUpdater.checkForJenkinsUpdates();
+        updateCenterUpdater.persistJson();
         updateCenterUpdater.checkForNewUpdates();
         updateCenterUpdater.persistJson();
     }
